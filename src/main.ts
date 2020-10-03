@@ -1,29 +1,60 @@
-/**
- * Some predefined delays (in milliseconds).
- */
-export enum Delays {
-  Short = 500,
-  Medium = 2000,
-  Long = 5000,
-}
+import * as Discord from 'discord.js';
+import { commands } from './commands';
 
-/**
- * Returns a Promise<string> that resolves after given time.
- *
- * @param {string} name - A name.
- * @param {number=} [delay=Delays.Medium] - Number of milliseconds to delay resolution of the Promise.
- * @returns {Promise<string>}
- */
-function delayedHello(name: string, delay: number = Delays.Medium): Promise<string> {
-  return new Promise((resolve: (value?: string) => void) =>
-    setTimeout(() => resolve(`Hello, ${name}`), delay),
+const client = new Discord.Client();
+
+const state = {
+  user: null as Nullable<Discord.User>,
+};
+
+client.on('ready', () => {
+  const user = client.user!;
+  state.user = user;
+
+  console.log(`Logged in as ${user.tag}!`);
+});
+
+const commandPattern = /(?:^| )!(\w+)/;
+
+client.on('message', (msg) => {
+  // Ignore own messages
+  if (msg.member!.id === state.user?.id) {
+    return;
+  }
+
+  const isMentioned = (msg: Discord.Message) => {
+    const mentioned = msg.mentions.users.first();
+
+    return mentioned && mentioned.id === state.user?.id;
+  };
+
+  if (!isMentioned(msg)) {
+    return;
+  }
+
+  const content = msg.cleanContent.toLocaleLowerCase();
+  const matches = content.match(commandPattern);
+
+  if (matches) {
+    const match = matches[1];
+    const commandName = match[0].toUpperCase() + match.substring(1);
+    const command = new commands[commandName](msg);
+
+    if (command.validate && !command.validate()) {
+      // Precondition not met.
+      return;
+    }
+
+    command.run();
+  }
+});
+
+const { DISCORD_API_TOKEN } = process.env;
+if (!DISCORD_API_TOKEN) {
+  throw new Error(
+    'Environmental variable `DISCORD_API_TOKEN` is not set.\n' +
+      'Please set `.env` to connect to Discord API',
   );
 }
 
-// Below are examples of using ESLint errors suppression
-// Here it is suppressing missing return type definitions for greeter function
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function greeter(name: string) {
-  return await delayedHello(name, Delays.Long);
-}
+client.login(DISCORD_API_TOKEN);

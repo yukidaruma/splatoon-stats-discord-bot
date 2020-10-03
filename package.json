@@ -36,7 +36,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\"",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
-    "start": "node build/src/main.js",
+    "start": "node -r dotenv/config build/src/main.js",
     "watch": "tsc-watch -p tsconfig.release.json --onSuccess \"npm start\"",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
