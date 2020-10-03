@@ -1,0 +1,16 @@
+{
+  "printWidth": 100,
+  "semi": true,
+  "arrowParens": "always",
+  "endOfLine": "lf",
+  "singleQuote": true,
+  "trailingComma": "all",
+  "overrides": [
+    {
+      "files": "*.ts",
+      "options": {
+        "parser": "typescript"
+      }
+    }
+  ]
+}
