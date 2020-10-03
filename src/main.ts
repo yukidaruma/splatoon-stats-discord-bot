@@ -21,6 +21,10 @@ Log4js.configure({
 });
 const logger = Log4js.getLogger();
 
+process.on('uncaughtException', function (error) {
+  logger.error({ type: 'error.uncaught', error });
+});
+
 const state = {
   l: logger,
   user: null as Nullable<Discord.User>,
